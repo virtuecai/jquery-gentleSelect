@@ -1,3 +1,5 @@
+# 更新支持bootstrap/性能体验优化, 修复部分bug, 请使用trunk代码
+
 # jQuery plugin: gentleSelect
 
 gentleSelect is a jQuery plugin for transfoming select boxes into
