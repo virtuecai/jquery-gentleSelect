@@ -33,7 +33,6 @@
         closeSpeed      : 400,
         openEffect      : "slide",
         closeEffect     : "slide",
-        disallowEmpty   : false,
         hideOnMouseOut  : true
     }
 
@@ -99,42 +98,18 @@
         }
         return arr.get().join(", ");
     }
-    
-    function updateState(c, o) {
-        var c = $(c);
-        if (c.attr("multiple") && o.disallowEmpty) { 
-            var all_items = c.data("dialog").find("li"),
-                selected_items = all_items.filter(".selected");
-                    
-            // mark element if only one selected
-            all_items.removeClass("sole-selected");
-            if (selected_items.length == 1) {
-              selected_items.addClass("sole-selected");
-            }
-        }
-    }
 
     var methods = {
         init : function(options) {
-            var o = $.extend({}, defaults, options),
-                select_items = this.find("option");
+            var o = $.extend({}, defaults, options);
 
             if (hasError(this, o)) { return this; }; // check for errors
             optionOverrides(this, o); // 
             this.hide(); // hide original select box
             
-            if (this.attr("multiple") && o.disallowEmpty)
-            {
-                if (select_items.length == 0) {
-                    $.error("gentleSelect: disallowEmpty conflicts with empty <select>");
-                }
-                // default to first item if none selected
-                if (this[0].selectedIndex < 0) { this[0].selectedIndex = 0; }
-            }
-            
             // initialise <span> to replace select box
             label_text = getSelectedAsText(this.find(":selected"), o);
-            var label = $("<span class='gentleselect-label'>" + label_text + "</span>")
+            var label = $("<button class='gentleselect-label btn btn-default'>" + label_text + "<i class='caret'></i></button>")
                 .insertBefore(this)
                 .bind("mouseenter.gentleselect", event_handlers.labelHoverIn)
                 .bind("mouseleave.gentleselect", event_handlers.labelHoverOut)
@@ -145,7 +120,7 @@
             
             // generate list of options
             var ul = $("<ul></ul>");
-            select_items.each(function() { 
+            this.find("option").each(function() { 
                 var li = $("<li>" + $(this).text() + "</li>")
                     .data("value", $(this).attr("value"))
                     .data("name", $(this).text())
@@ -158,6 +133,7 @@
                 .append(ul)
                 .insertAfter(label)
                 .bind("click.gentleselect", event_handlers.dialogClick)
+                .bind("mouseenter.gentleselect", event_handlers.dialogHoverIn)
                 .bind("mouseleave.gentleselect", event_handlers.dialogHoverOut)
                 .data("label", label)
                 .data("root", this);
@@ -167,7 +143,8 @@
             if (defined(o.columns) || defined(o.rows)) {
 
                 // Update CSS
-                ul.css("float", "left")
+                var ulPadding = 5;
+                ul.css("float", "left").css('padding', ulPadding + 'px')
                     .find("li").width(o.itemWidth).css("float","left");
                     
                 var f = ul.find("li:first");
@@ -182,7 +159,7 @@
                     var rows = parseInt(o.rows);
                     var cols = Math.ceil(elemCount / rows);
                 }
-                dialog.width(actualWidth * cols);
+                dialog.width(actualWidth * cols + ulPadding * 2);
 
                 // add padding
                 for (var i = 0; i < (rows * cols) - elemCount; i++) {
@@ -213,7 +190,6 @@
             // ESC key should hide all dialog boxes
             $(document).bind("keyup.gentleselect", event_handlers.keyUp);
 
-            updateState(this, o);
             return this;
         },
 
@@ -223,7 +199,7 @@
             var opts = this.data("options");
 
             // Update li with selected data
-            var v = (this.attr("multiple") && this.val()) ? this.val() : [this.val()];
+            var v = (this.attr("multiple")) ? this.val() : [this.val()];
             $("li", this.data("dialog")).each(function() {
                 var $li = $(this);
                 var isSelected = ($.inArray($li.data("value"), v) != -1);
@@ -234,24 +210,7 @@
             var label = getSelectedAsText(this.find(":selected"), opts);
             this.data("label").text(label);
             
-            updateState(this, opts);
             return this;
-        },
-        
-        // clear all selections
-        clear : function() {
-            // Check for disallowEmpty option
-            if (this.data("options").disallowEmpty) {
-              $.error("gentleSelect: cannot use 'clear' when disallowEmpty=true");
-              return this;
-            }
-
-            // Deselect all options.
-            // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-85676760
-            this[0].selectedIndex = -1;
-
-            // Update dialog
-            return methods["update"].call(this);
         }
     };
 
@@ -271,7 +230,7 @@
             var root = $this.data("root");
             var opts = root.data("options");
             var dialog = root.data("dialog")
-                .css("top", pos.top + $this.height())
+                .css("top", pos.top + $this.height() + 15)
                 .css("left", pos.left + 1);
             if (opts.openEffect == "fade") {
                 dialog.fadeIn(opts.openSpeed);
@@ -283,8 +242,14 @@
         dialogHoverOut : function() {
             var $this = $(this);
             if ($this.data("root").data("options").hideOnMouseOut) {
-                $this.hide();
+                this.dialogHoverOut = setTimeout(function () {
+                    $this.hide();
+                }, 600)
             }
+        },
+
+        dialogHoverIn : function() {
+            this.dialogHoverOut && clearTimeout(this.dialogHoverOut);
         },
 
         dialogClick : function(e) {
@@ -306,23 +271,16 @@
                 var label = $this.data("label")
 
                 if ($this.data("root").attr("multiple")) {
-                    if (opts.disallowEmpty 
-                          && clicked.hasClass("selected") 
-                          && (root.find(":selected").length == 1)) {
-                        // sole item clicked. For now, do nothing.
-                        return;
-                    }
                     clicked.toggleClass("selected");
                     var s = $this.find("li.selected");
                     label.text(getSelectedAsText(s, opts));
                     var v = s.map(function(){ return $(this).data("value"); });
                     // update actual selectbox and trigger change event
                     root.val(v.get()).trigger("change");
-                    updateState(root, opts);
                 } else {
                     $this.find("li.selected").removeClass("selected");
                     clicked.addClass("selected");
-                    label.text(clicked.data("name"));
+                    label.html(clicked.data("name") + "<i class='caret'></i>");
                     // update actual selectbox and trigger change event
                     root.val(value).trigger("change");
                 }
@@ -337,10 +295,14 @@
     };
 
     $.fn.gentleSelect = function(method) {
+        var params = arguments;
         if (methods[method]) {
             return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || ! method) {
-            return methods.init.apply(this, arguments);
+            return this.map(function () {
+                return methods.init.apply($(this), params);
+            });
+            //return methods.init.apply(this, arguments);
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.gentleSelect' );
         }   
