@@ -20,7 +20,7 @@
  *
  */
 (function($) {
-    
+
     var defaults = {
         minWidth  : 100, // only applies if columns and itemWidth not set
         itemWidth : undefined,
@@ -54,13 +54,13 @@
             $.error("gentleSelect: itemWidth must be supplied if 'rows' is specified");
             return true;
         }
-        if (!defined(o.openSpeed) || typeof o.openSpeed != "number" && 
-                (typeof o.openSpeed == "string" && (o.openSpeed != "slow" && o.openSpeed != "fast"))) { 
+        if (!defined(o.openSpeed) || typeof o.openSpeed != "number" &&
+            (typeof o.openSpeed == "string" && (o.openSpeed != "slow" && o.openSpeed != "fast"))) {
             $.error("gentleSelect: openSpeed must be an integer or \"slow\" or \"fast\"");
             return true;
         }
-        if (!defined(o.closeSpeed) || typeof o.closeSpeed != "number" && 
-                (typeof o.closeSpeed == "string" && (o.closeSpeed != "slow" && o.closeSpeed != "fast"))) { 
+        if (!defined(o.closeSpeed) || typeof o.closeSpeed != "number" &&
+            (typeof o.closeSpeed == "string" && (o.closeSpeed != "slow" && o.closeSpeed != "fast"))) {
             $.error("gentleSelect: closeSpeed must be an integer or \"slow\" or \"fast\"");
             return true;
         }
@@ -85,7 +85,7 @@
         }
     }
 
-    function getSelectedAsText(elemList, opts) { 
+    function getSelectedAsText(elemList, opts) {
         // If no items selected, return prompt
         if (elemList.length < 1) { return opts.prompt; }
 
@@ -106,7 +106,7 @@
             if (hasError(this, o)) { return this; }; // check for errors
             optionOverrides(this, o); // 
             this.hide(); // hide original select box
-            
+
             // initialise <span> to replace select box
             label_text = getSelectedAsText(this.find(":selected"), o);
             var label = $("<button class='gentleselect-label btn btn-default'>" + label_text + "<i class='caret'></i></button>")
@@ -117,15 +117,15 @@
                 .data("root", this);
             this.data("label", label)
                 .data("options", o);
-            
+
             // generate list of options
             var ul = $("<ul></ul>");
-            this.find("option").each(function() { 
+            this.find("option").each(function() {
                 var li = $("<li>" + $(this).text() + "</li>")
                     .data("value", $(this).attr("value"))
                     .data("name", $(this).text())
                     .appendTo(ul);
-                if ($(this).attr("selected")) { li.addClass("selected"); } 
+                if ($(this).attr("selected")) { li.addClass("selected"); }
             });
 
             // build dialog box
@@ -138,7 +138,7 @@
                 .data("label", label)
                 .data("root", this);
             this.data("dialog", dialog);
-           
+
             // if to be displayed in columns
             if (defined(o.columns) || defined(o.rows)) {
 
@@ -146,10 +146,10 @@
                 var ulPadding = 5;
                 ul.css("float", "left").css('padding', ulPadding + 'px')
                     .find("li").width(o.itemWidth).css("float","left");
-                    
+
                 var f = ul.find("li:first");
-                var actualWidth = o.itemWidth 
-                    + parseInt(f.css("padding-left")) 
+                var actualWidth = o.itemWidth
+                    + parseInt(f.css("padding-left"))
                     + parseInt(f.css("padding-right"));
                 var elemCount = ul.find("li").length;
                 if (defined(o.columns)) {
@@ -170,8 +170,8 @@
                 var ptr = [];
                 var idx = 0;
                 ul.find("li").each(function() {
-                    if (idx < rows) { 
-                        ptr[idx] = $(this); 
+                    if (idx < rows) {
+                        ptr[idx] = $(this);
                     } else {
                         var p = idx % rows;
                         $(this).insertAfter(ptr[p]);
@@ -209,23 +209,35 @@
             // Update label
             var label = getSelectedAsText(this.find(":selected"), opts);
             this.data("label").text(label);
-            
+
             return this;
         }
     };
 
     var event_handlers = {
 
-        labelHoverIn : function() { 
-            $(this).addClass('gentleselect-label-highlight'); 
+        labelHoverIn : function() {
+            $(this).addClass('gentleselect-label-highlight');
         },
 
-        labelHoverOut : function() { 
-            $(this).removeClass('gentleselect-label-highlight'); 
+        labelHoverOut : function() {
+            $(this).removeClass('gentleselect-label-highlight');
         },
 
         labelClick : function() {
             var $this = $(this);
+
+            //hide other dialog
+            $('.gentleselect-label').filter(function () {
+                return this != $this[0];
+            }).each(function () {
+                var _$this = $(this);
+                var _root = _$this.data("root");
+                var _opts = _root.data("options");
+                var _dialog = _root.data("dialog")
+                _dialog.hide();
+            });
+
             var pos = $this.position();
             var root = $this.data("root");
             var opts = root.data("options");
@@ -238,7 +250,7 @@
                 dialog.slideDown(opts.openSpeed);
             }
         },
-    
+
         dialogHoverOut : function() {
             var $this = $(this);
             if ($this.data("root").data("options").hideOnMouseOut) {
@@ -305,7 +317,7 @@
             //return methods.init.apply(this, arguments);
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.gentleSelect' );
-        }   
+        }
     };
 
 
