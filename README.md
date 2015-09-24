@@ -1,4 +1,9 @@
-# 更新支持bootstrap/性能体验优化, 修复部分bug, 请使用trunk代码
+
+##更新
+* 支持 bootstrap
+* 体验优化
+* 部分bug修复
+* 使用最新trunk即可
 
 # jQuery plugin: gentleSelect
 
