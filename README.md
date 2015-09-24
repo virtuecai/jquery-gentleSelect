@@ -19,12 +19,12 @@ To use this plugin, one simply needs to load jQuery and the
 JS/CSS scripts for gentleSelect, then attach it to your
 select boxes on DOM ready:
 
-    <link type="text/css" src="gentleSelect/jquery-gentleSelect.min.css" />
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
-    <script type="text/javascript" src="gentleSelect/jquery-gentleSelect-min.js"></script>
+    <link type="text/css" src="dist/jquery-gentleSelect.min.css" />
+    <script type="text/javascript" src="libs/jquery.min.js"></script>
+    <script type="text/javascript" src="dist/jquery-gentleSelect.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
-        $('#your-select-box-id').gentleSelect();
+        $('select').gentleSelect();
     });
     </script>
 
