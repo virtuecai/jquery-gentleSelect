@@ -20,8 +20,11 @@
 }
 
 .gentleselect-label .caret {
-    float: right;
-    margin-top: 8px;
+   /* float: right;
+    margin-top: 8px;*/
+    /*兼容firefox*/
+    margin-top: -4px;
+    margin-left: 6px;
 }
 
 .gentleselect-label-highlight {
